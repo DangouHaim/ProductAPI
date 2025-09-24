@@ -8,6 +8,7 @@ namespace ProductAPI.Services
         Task Add(Product product);
         Task<Product?> GetById(Guid id);
         Task<IEnumerable<Product>> GetAll();
+        Task<IEnumerable<Product>> GetPage(int pageNumber, int pageSize);
         Task<bool> Update(Product product);
         Task<bool> Delete(Guid id);
     }
@@ -50,6 +51,23 @@ namespace ProductAPI.Services
         {
             await Task.Delay(1000); // Simulate some delay
             return await Task.FromResult(_products);
+        }
+
+        public async Task<IEnumerable<Product>> GetPage(int pageNumber, int pageSize)
+        {
+            if (pageNumber < 1)
+                pageNumber = 1;
+
+            if (pageSize < 1)
+                pageSize = 10;
+
+            var pagedProducts = _products
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            await Task.Delay(1000); // Simulate some delay
+            return await Task.FromResult(pagedProducts);
         }
 
         public async Task<Product?> GetById(Guid id)

@@ -19,15 +19,15 @@ public class CatalogController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Product>>> GetAll()
+    public async Task<ActionResult<IEnumerable<Product>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        var key = GetCacheKey();
+        var key = GetCacheKey(HashCode.Combine(pageNumber, pageSize));
 
         var result = await _cache.GetOrCreateAsync(key, async entry =>
         {
             entry.ThrowIfCancellationRequested();
 
-            return await _productService.GetAll();
+            return await _productService.GetPage(pageNumber, pageSize);
         }, tags: [_keyPrefix]);
 
         return Ok(result);
@@ -36,6 +36,9 @@ public class CatalogController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Product?>> Get(Guid id)
     {
+        if (id == Guid.Empty)
+            return BadRequest("Invalid product id.");
+
         var key = GetCacheKey(id);
 
         var result = await _cache.GetOrCreateAsync(key, async entry =>
@@ -51,6 +54,12 @@ public class CatalogController : ControllerBase
     [HttpPost()]
     public async Task<IActionResult> AddProduct(Product product)
     {
+        if (product.Id == Guid.Empty)
+            product.Id = Guid.NewGuid();
+
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
         await _productService.Add(product);
 
         return Ok(new { message = $"Product {product.Id} created." });
@@ -59,6 +68,12 @@ public class CatalogController : ControllerBase
     [HttpPut()]
     public async Task<IActionResult> UpdateProduct(Product product)
     {
+        if (product.Id == Guid.Empty)
+            return BadRequest("Invalid product id.");
+
+        if (!ModelState.IsValid)
+            return ValidationProblem(ModelState);
+
         var key = GetCacheKey(product.Id);
 
         var updated = await _productService.Update(product);
@@ -76,6 +91,9 @@ public class CatalogController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProduct(Guid id)
     {
+        if (id == Guid.Empty)
+            return BadRequest("Invalid product id.");
+
         var key = GetCacheKey(id);
 
         var deleted = await _productService.Delete(id);
@@ -98,7 +116,7 @@ public class CatalogController : ControllerBase
         return Ok(new { message = $"Cache {_keyPrefix} cleared." });
     }
 
-    private string GetCacheKey(Guid? id = null)
+    private string GetCacheKey(object? id = null)
     {
         return $"{_keyPrefix}:{id}";
     }
