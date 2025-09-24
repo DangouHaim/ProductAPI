@@ -1,4 +1,5 @@
 using ProductAPI.Services;
+using ProductAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,8 @@ builder.Services.AddHybridCache(options =>
 });
 
 var app = builder.Build();
+
+app.UseMiddleware<ErrorLoggingMiddleware>();
 
 app.MapDefaultEndpoints();
 

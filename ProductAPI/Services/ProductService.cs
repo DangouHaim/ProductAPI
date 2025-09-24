@@ -8,8 +8,8 @@ namespace ProductAPI.Services
         Task Add(Product product);
         Task<Product?> GetById(Guid id);
         Task<IEnumerable<Product>> GetAll();
-        Task Update(Product product);
-        Task Delete(Guid id);
+        Task<bool> Update(Product product);
+        Task<bool> Delete(Guid id);
     }
 
     public class ProductService : IProductService
@@ -34,11 +34,16 @@ namespace ProductAPI.Services
             await Task.CompletedTask;
         }
 
-        public async Task Delete(Guid id)
+        public async Task<bool> Delete(Guid id)
         {
-            _products.RemoveAll(p => p.Id == id);
+            if(_products.Any(p => p.Id == id))
+            {
+                _products.RemoveAll(p => p.Id == id);
 
-            await Task.CompletedTask;
+                return await Task.FromResult(true);
+            }
+
+            return await Task.FromResult(false);
         }
 
         public async Task<IEnumerable<Product>> GetAll()
@@ -53,15 +58,17 @@ namespace ProductAPI.Services
             return await Task.FromResult(_products.FirstOrDefault(p => p.Id == id));
         }
 
-        public async Task Update(Product product)
+        public async Task<bool> Update(Product product)
         {
             var index = _products.FindIndex(p => p.Id == product.Id);
             if (index != -1)
             {
                 _products[index] = product;
+
+                return await Task.FromResult(true);
             }
 
-            await Task.CompletedTask;
+            return await Task.FromResult(false);
         }
     }
 }

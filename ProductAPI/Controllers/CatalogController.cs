@@ -23,6 +23,7 @@ public class CatalogController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Product>>> GetAll()
     {
+        throw new Exception("Test exception logging middleware");
         var key = GetCacheKey();
 
         var result = await _cache.GetOrCreateAsync(key, async entry =>
@@ -47,7 +48,7 @@ public class CatalogController : ControllerBase
             return await _productService.GetById(id);
         }, tags: [_keyPrefix]);
 
-        return result;
+        return result is null ? NotFound(result) : Ok(result);
     }
 
     [HttpPost()]
@@ -63,10 +64,16 @@ public class CatalogController : ControllerBase
     {
         var key = GetCacheKey(product.Id);
 
-        await _productService.Update(product);
-        await _cache.RemoveAsync(key);
+        var updated = await _productService.Update(product);
 
-        return Ok(new { message = $"Product {product.Id} updated." });
+        if(updated)
+        {
+            await _cache.RemoveAsync(key);
+
+            return Ok(new { message = $"Product {product.Id} updated." });
+        }
+
+        return NotFound(product);
     }
 
     [HttpDelete("{id}")]
@@ -74,10 +81,16 @@ public class CatalogController : ControllerBase
     {
         var key = GetCacheKey(id);
 
-        await _productService.Delete(id);
-        await _cache.RemoveAsync(key);
+        var deleted = await _productService.Delete(id);
 
-        return Ok(new { message = $"Product {id} deleted." });
+        if(deleted)
+        {
+            await _cache.RemoveAsync(key);
+
+            return Ok(new { message = $"Product {id} deleted." });
+        }
+
+        return NotFound(id);
     }
 
     [HttpDelete("PurgeCache")]
@@ -90,6 +103,6 @@ public class CatalogController : ControllerBase
 
     private string GetCacheKey(Guid? id = null)
     {
-        return $"{_keyPrefix}:{id}:{DateTime.UtcNow:yyyyMMddHH}";
+        return $"{_keyPrefix}:{id}";
     }
 }
