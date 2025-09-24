@@ -9,13 +9,11 @@ namespace ProductAPI.Controllers;
 public class CatalogController : ControllerBase
 {
     private readonly string _keyPrefix = $"{nameof(CatalogController)}";
-    private readonly ILogger<CatalogController> _logger;
     private readonly HybridCache _cache;
     private readonly IProductService _productService;
 
-    public CatalogController(HybridCache cache, ILogger<CatalogController> logger, IProductService productService)
+    public CatalogController(HybridCache cache, IProductService productService)
     {
-        _logger = logger;
         _cache = cache;
         _productService = productService;   
     }
@@ -23,7 +21,6 @@ public class CatalogController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Product>>> GetAll()
     {
-        throw new Exception("Test exception logging middleware");
         var key = GetCacheKey();
 
         var result = await _cache.GetOrCreateAsync(key, async entry =>

@@ -13,7 +13,13 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-//builder.Services.AddMemoryCache();
+//builder.Services.AddMemoryCache(); // enabled by default
+
+builder.Services.AddStackExchangeRedisCache(options => // Adding Redis distributed cache
+{
+    options.Configuration = builder.Configuration.GetConnectionString("cache");
+    options.InstanceName = "productapi:"; // Application specific prefix
+});
 
 builder.Services.AddHybridCache(options =>
 {
