@@ -61,6 +61,7 @@ public class CatalogController : ControllerBase
             return ValidationProblem(ModelState);
 
         await _productService.Add(product);
+        await _cache.RemoveByTagAsync(_keyPrefix);
 
         return Ok(new { message = $"Product {product.Id} created." });
     }
@@ -80,7 +81,7 @@ public class CatalogController : ControllerBase
 
         if(updated)
         {
-            await _cache.RemoveAsync(key);
+            await _cache.RemoveByTagAsync(_keyPrefix);
 
             return Ok(new { message = $"Product {product.Id} updated." });
         }
@@ -100,7 +101,7 @@ public class CatalogController : ControllerBase
 
         if(deleted)
         {
-            await _cache.RemoveAsync(key);
+            await _cache.RemoveByTagAsync(_keyPrefix);
 
             return Ok(new { message = $"Product {id} deleted." });
         }
