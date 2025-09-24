@@ -1,14 +1,15 @@
 ﻿using ProductAPI.Extensions;
+using System.Runtime.CompilerServices;
 
 namespace ProductAPI.Services
 {
     public interface IProductService
     {
-        void Add(Product product);
-        Product? GetById(Guid id);
-        IEnumerable<Product> GetAll();
-        void Update(Product product);
-        void Delete(Guid id);
+        Task Add(Product product);
+        Task<Product?> GetById(Guid id);
+        Task<IEnumerable<Product>> GetAll();
+        Task Update(Product product);
+        Task Delete(Guid id);
     }
 
     public class ProductService : IProductService
@@ -26,33 +27,41 @@ namespace ProductAPI.Services
             }
         }
 
-        public void Add(Product product)
+        public async Task Add(Product product)
         {
             _products.Add(product);
+
+            await Task.CompletedTask;
         }
 
-        public void Delete(Guid id)
+        public async Task Delete(Guid id)
         {
             _products.RemoveAll(p => p.Id == id);
+
+            await Task.CompletedTask;
         }
 
-        public IEnumerable<Product> GetAll()
+        public async Task<IEnumerable<Product>> GetAll()
         {
-            return _products;
+            await Task.Delay(1000); // Simulate some delay
+            return await Task.FromResult(_products);
         }
 
-        public Product? GetById(Guid id)
+        public async Task<Product?> GetById(Guid id)
         {
-            return _products.FirstOrDefault(p => p.Id == id);
+            await Task.Delay(1000); // Simulate some delay
+            return await Task.FromResult(_products.FirstOrDefault(p => p.Id == id));
         }
 
-        public void Update(Product product)
+        public async Task Update(Product product)
         {
             var index = _products.FindIndex(p => p.Id == product.Id);
             if (index != -1)
             {
                 _products[index] = product;
             }
+
+            await Task.CompletedTask;
         }
     }
 }
