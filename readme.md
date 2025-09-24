@@ -7,7 +7,7 @@ Supports product CRUD operations with caching, paging, and cache invalidation.
 
 ## Requirements
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)  
 - [Docker](https://docs.docker.com/get-docker/)  
 - [Redis](https://hub.docker.com/_/redis) (running in a container or locally)
 
@@ -17,6 +17,6 @@ Supports product CRUD operations with caching, paging, and cache invalidation.
 
 ### 1. Clone the repository and run ProductAPI.AppHost
 ```bash
-git clone https://github.com/your-org/product-api.git
-cd https://github.com/DangouHaim/ProductAPI
+git clone https://github.com/DangouHaim/ProductAPI
+cd ProductAPI\ProductAPI.AppHost\
 dotnet run
